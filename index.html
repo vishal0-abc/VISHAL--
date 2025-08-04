@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Car Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    canvas {
+      background: #2d3748; /* dark road background */
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-indigo-700 p-6 text-center text-3xl font-bold shadow-md">
+    Simple Car Game
+  </header>
+
+  <!-- Game Container -->
+  <main class="flex-grow flex flex-col items-center justify-center p-6">
+    <canvas id="gameCanvas" width="400" height="600" class="mb-6 rounded-lg"></canvas>
+    <p class="text-gray-300 text-center max-w-md">
+      Use <span class="font-semibold text-indigo-400">LEFT</span> and <span class="font-semibold text-indigo-400">RIGHT</span> arrow keys to move the car.
+    </p>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-indigo-700 p-4 text-center text-gray-200">
+    &copy; 2025 Simple Car Game
+  </footer>
+
+  <!-- Game Script -->
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const roadWidth = 300;
+    const roadLeft = (canvas.width - roadWidth) / 2;
+    const laneWidth = roadWidth / 3;
+
+    // Car image - simple rectangle instead of actual image
+    const carWidth = 50;
+    const carHeight = 100;
+
+    let carX = canvas.width / 2 - carWidth / 2;
+    let carY = canvas.height - carHeight - 20;
+
+    // Lane lines properties
+    const laneLineWidth = 10;
+    const laneLineHeight = 50;
+    let laneLineOffset = 0;
+
+    // Game loop timing
+    const fps = 60;
+
+    // Movement
+    let moveLeft = false;
+    let moveRight = false;
+    const carSpeed = 5;
+
+    // Draw road background
+    function drawRoad() {
+      // Grass on sides
+      ctx.fillStyle = '#14532d'; // dark green
+      ctx.fillRect(0, 0, roadLeft, canvas.height);
+      ctx.fillRect(roadLeft + roadWidth, 0, canvas.width - (roadLeft + roadWidth), canvas.height);
+
+      // Road
+      ctx.fillStyle = '#374151'; // gray road
+      ctx.fillRect(roadLeft, 0, roadWidth, canvas.height);
+
+      // Road borders (solid white lines)
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(roadLeft, 0);
+      ctx.lineTo(roadLeft, canvas.height);
+      ctx.moveTo(roadLeft + roadWidth, 0);
+      ctx.lineTo(roadLeft + roadWidth, canvas.height);
+      ctx.stroke();
+
+      // Dashed lane lines (middle two lines)
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = laneLineWidth;
+      ctx.setLineDash([20, 20]);
+      for (let i = 1; i < 3; i++) {
+        let x = roadLeft + i * laneWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, -laneLineHeight + laneLineOffset);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+
+    // Draw the car
+    function drawCar() {
+      ctx.fillStyle = '#ef4444'; // red car
+
+      // Car body
+      ctx.fillRect(carX, carY, carWidth, carHeight);
+
+      // Car windows
+      ctx.fillStyle = '#bfdbfe';
+      ctx.fillRect(carX + 10, carY + 20, 30, 40);
+    }
+
+    // Update game state
+    function update() {
+      if (moveLeft && carX > roadLeft + 10) {
+        carX -= carSpeed;
+      }
+      if (moveRight && carX < roadLeft + roadWidth - carWidth - 10) {
+        carX += carSpeed;
+      }
+
+      // Animate lane lines
+      laneLineOffset += 10;
+      if (laneLineOffset > 40) laneLineOffset = 0;
+    }
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawRoad();
+      drawCar();
+      update();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Listen to keys
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') moveLeft = true;
+      if (e.key === 'ArrowRight') moveRight = true;
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft') moveLeft = false;
+      if (e.key === 'ArrowRight') moveRight = false;
+    });
+
+    // Start game
+    gameLoop();
+  </script>
+</body>
+</html>
